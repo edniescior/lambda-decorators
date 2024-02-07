@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "lambda-decorators"
+version = "0.1.0"
+description = "Helpful decorators for managing boilerplate Lambda stuff."
+authors = ["Edward Niescior <edniescior@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "lambda_decorators"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.1"
+flake8 = "^7.0"
+flake8-bandit = "^4.1"
+flake8-bugbear = "^24.1"
+flake8-builtins = "^2.2"
+flake8-comprehensions = "^3.14"
+flake8-eradicate = "^1.5"
+flake8-implicit-str-concat = "^0.4"
+flake8-print = "^5.0.0"
+pep8-naming = "^0.13.3"
+isort = "^5.13"
+pytest = "^7.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
