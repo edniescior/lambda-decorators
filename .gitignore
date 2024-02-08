@@ -54,8 +54,6 @@ venv.bak/
 
 # IDE
 .vscode/
-launch.json
-settings.json
 
 # Poetry
 /poetry.toml
