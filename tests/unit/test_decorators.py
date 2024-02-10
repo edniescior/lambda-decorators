@@ -48,7 +48,7 @@ def test_with_logging(caplog):
     def handler(event, context):
         return 42
 
-    assert handler("boo", "ya") == 42
+    assert handler({"boo": "ya"}, {}) == 42
     assert len(caplog.records) == 3
 
     assert caplog.records[0].message == "Calling handler"
@@ -59,7 +59,7 @@ def test_with_logging(caplog):
     assert caplog.records[1].levelno == logging.DEBUG
     assert caplog.records[1].module == "decorators"
 
-    assert caplog.records[2].message == "Event: boo"
+    assert caplog.records[2].message == 'Event: {\n  "boo": "ya"\n}'
     assert caplog.records[2].levelno == logging.INFO
     assert caplog.records[2].module == "decorators"
 

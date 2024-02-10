@@ -4,6 +4,7 @@ import os
 import sys
 import traceback
 from functools import wraps
+from json.decoder import JSONDecodeError
 
 import boto3
 from botocore.exceptions import ClientError
@@ -36,7 +37,10 @@ def with_logging(handler):
     def wrapper(event, *args, **kwargs):
         logger.info(f"Calling {handler.__name__}")
         logger.debug(f"Environment variables: {json.dumps(os.environ.copy())}")
-        logger.info(f"Event: {event}")
+        try:
+            logger.info(f"Event: {json.dumps(event, indent=2)}")
+        except JSONDecodeError:
+            logger.warn(f"JSONDecodeError: Event: {event}")
         return handler(event, *args, **kwargs)
 
     return wrapper
