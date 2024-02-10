@@ -29,6 +29,7 @@ def with_logging(handler):
         DEBUG:root:Environment variables: {"LOG_LEVEL": "DEBUG"}
         INFO:root:Event: {}
         {'message': 'Hello World'}
+
     """
 
     @wraps(handler)
@@ -141,7 +142,7 @@ def catch_errors(handler):
 
 def with_ssm_parameters(*parameters):
     """
-    Decorator that fetches a secrets from the SSM parameter store. Secrets are added
+    Decorator that fetches secrets from the SSM parameter store. Secrets are added
     to a dictionary named ``parameters`` on the context object.
 
     Returns an empty dict if the secrets are not found.
@@ -197,7 +198,7 @@ def cors_headers(origin=None, credentials=False):
         ...     return {'body': 'foobar'}
         >>> my_handler_custom_origin({}, object())
         {'body': 'foobar', 'headers': {'Access-Control-Allow-Origin': 'https://example.com',
-                                       'Access-Control-Allow-Credentials': True}}
+                                       'Access-Control-Allow-Credentials': true}}
     """
 
     def wrapper_wrapper(handler):
