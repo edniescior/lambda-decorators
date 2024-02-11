@@ -63,12 +63,10 @@ with_ssm_parameters:
 
     >>> from lambda_decorators import with_ssm_parameters
     >>>
-    >>> @with_ssm_parameter("/test/foo")
+    >>> @with_ssm_parameters("/test/foo")
     ... def my_handler(event, context):
-    ...     return context.parameters
-    >>> class Context:
-    ...     pass
-    >>> my_handler({}, Context())
+    ...     return {"/test/foo", os.getenv("/test/foo")}
+    >>> my_handler({}, {})
     {'/test/foo': 'bar'}
 
 

@@ -67,11 +67,11 @@ def load_json_body(handler):
     """
 
     @wraps(handler)
-    def wrapper(event, context):
+    def wrapper(event, *args, **kwargs):
         if isinstance(event.get("body"), str):
             event["body"] = json.loads(event["body"])
 
-        return handler(event, context)
+        return handler(event, *args, **kwargs)
 
     return wrapper
 
@@ -147,20 +147,16 @@ def catch_errors(handler):
 def with_ssm_parameters(*parameters):
     """
     Decorator that fetches secrets from the SSM parameter store. Secrets are added
-    to a dictionary named ``parameters`` on the context object.
-
-    Returns an empty dict if the secrets are not found.
+    as environment variables.
 
     Usage::
 
         >>> from lambda_decorators import with_ssm_parameters
         >>>
-        >>> @with_ssm_parameter("/test/foo")
+        >>> @with_ssm_parameters("/test/foo")
         ... def my_handler(event, context):
-        ...     return context.parameters
-        >>> class Context:
-        ...     pass
-        >>> my_handler({}, Context())
+        ...     return {"/test/foo", os.getenv("/test/foo")}
+        >>> my_handler({}, {})
         {'/test/foo': 'bar'}
     """
 
@@ -168,12 +164,10 @@ def with_ssm_parameters(*parameters):
         @wraps(handler)
         def wrapper(event, context):
             ssm = boto3.client("ssm")
-            if not hasattr(context, "parameters"):
-                context.parameters = {}
             for parameter in ssm.get_parameters(Names=parameters, WithDecryption=True)[
                 "Parameters"
             ]:
-                context.parameters[parameter["Name"]] = parameter["Value"]
+                os.environ[parameter["Name"]] = parameter["Value"]
 
             return handler(event, context)
 

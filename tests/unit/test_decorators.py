@@ -129,12 +129,9 @@ def test_with_ssm_parameters_single(ssm_client):
 
     @with_ssm_parameters("/test/foo")
     def my_handler(event, context):
-        return context.parameters
+        return {"/test/foo", os.getenv("/test/foo")}
 
-    class Context:
-        pass
-
-    assert my_handler({}, Context()) == {"/test/foo": "Bar"}
+    assert my_handler({}, {}) == {"/test/foo", "Bar"}
 
 
 # test with_ssm_parameters with multiple parameters
@@ -156,25 +153,19 @@ def test_with_ssm_parameters_multi(ssm_client):
 
     @with_ssm_parameters("/test/foo", "/test/man")
     def my_handler(event, context):
-        return context.parameters
+        return (os.getenv("/test/foo"), os.getenv("/test/man"))
 
-    class Context:
-        pass
-
-    assert my_handler({}, Context()) == {"/test/foo": "Bar", "/test/man": "Chu"}
+    assert my_handler({}, {}) == ("Bar", "Chu")
 
 
 # test with_ssm_parameters with missing parameter
 def test_with_ssm_parameters_none(ssm_client):
 
-    @with_ssm_parameters("/test/foo")
+    @with_ssm_parameters("/test/boo")
     def my_handler(event, context):
-        return context.parameters
+        os.getenv("/test/boo")
 
-    class Context:
-        pass
-
-    assert my_handler({}, Context()) == {}
+    assert my_handler({}, {}) is None
 
 
 # test cors_headers with no origin
