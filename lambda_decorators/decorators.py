@@ -163,11 +163,15 @@ def with_ssm_parameters(*parameters):
     def wrapper_wrapper(handler):
         @wraps(handler)
         def wrapper(event, context):
-            ssm = boto3.client("ssm")
-            for parameter in ssm.get_parameters(Names=parameters, WithDecryption=True)[
-                "Parameters"
-            ]:
-                os.environ[parameter["Name"]] = parameter["Value"]
+            # make sure parameters contains valid strings
+            params = [p for p in parameters if isinstance(p, str)]
+
+            if params:
+                ssm = boto3.client("ssm")
+                for parameter in ssm.get_parameters(Names=params, WithDecryption=True)[
+                    "Parameters"
+                ]:
+                    os.environ[parameter["Name"]] = parameter["Value"]
 
             return handler(event, context)
 

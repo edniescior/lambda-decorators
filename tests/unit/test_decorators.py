@@ -168,6 +168,16 @@ def test_with_ssm_parameters_none(ssm_client):
     assert my_handler({}, {}) is None
 
 
+# test with_ssm_parameters with no parameters passed in
+def test_with_ssm_parameters_empty(ssm_client):
+
+    @with_ssm_parameters()
+    def my_handler(event, context):
+        os.getenv("/test/boo")
+
+    assert my_handler({}, {}) is None
+
+
 # test cors_headers with no origin
 def test_cors_headers_no_origin():
 
