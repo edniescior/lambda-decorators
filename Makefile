@@ -34,7 +34,7 @@ build: ## Package up the artifact
 	@echo '=== running build ==='
 	rm -rf artifact.zip dist/* package/*
 	poetry build
-	poetry run pip install --upgrade -t package dist/*.whl
+	poetry run pip install --upgrade -t package/python dist/*.whl
 	cd package ; zip -r ../artifact.zip . -x '*.pyc'
 
 deploy: ## Deploy to AWS
