@@ -7,7 +7,6 @@ from functools import wraps
 from json.decoder import JSONDecodeError
 
 import boto3
-from botocore.exceptions import ClientError
 
 logger = logging.getLogger()
 logger.setLevel(os.getenv("LOG_LEVEL", logging.INFO))
@@ -78,7 +77,8 @@ def load_json_body(handler):
 
 def catch_errors(handler):
     """
-    Decorator which performs catch all exception handling.
+    Decorator which performs catch all exception handling. It logs the error
+    with a stack trace and passes on the exception to the caller.
 
     Usage::
 
@@ -86,10 +86,10 @@ def catch_errors(handler):
         >>>
         >>> @catch_errors
         ... def my_handler(event, context):
-        ...     raise ValueError("This is a test")
+        ...     raise ValueError("boo")
         >>>
         >>> my_handler({}, {})
-        {'statusCode': 400, 'body': '{"Message": "Invalid request: This is a test"}'}
+        ERROR    root:decorators.py:119 {"errorType": "ValueError", "errorMessage": "boo", "stackTrace":...
 
     """
 
@@ -110,36 +110,15 @@ def catch_errors(handler):
 
         try:
             return handler(event, context)
-        except ClientError as e:
-            logger.error(error_msg())
-            return {
-                "statusCode": e.response["ResponseMetadata"].get("HTTPStatusCode", 400),
-                "body": json.dumps(
-                    {
-                        "message": f"Client error: {str(e)}",
-                    }
-                ),
-            }
-        except ValueError as e:
-            logger.error(error_msg())
-            return {
-                "statusCode": 400,
-                "body": json.dumps(
-                    {
-                        "message": f"Invalid request: {str(e)}",
-                    }
-                ),
-            }
+
+        # We could catch the following specifice errors:
+        # ClientError, ValueError, JSONDecodeError
+        # But I'm just logging them and passing it on
+        # so that the function is marked as a failure. Hence,
+        # just the catch-all Exception.
         except Exception as e:
             logger.error(error_msg())
-            return {
-                "statusCode": 400,
-                "body": json.dumps(
-                    {
-                        "message": f"Unable to process request: {str(e)}",
-                    }
-                ),
-            }
+            raise e
 
     return wrapper
 

@@ -8,7 +8,7 @@ this [collection](https://github.com/dschep/lambda-decorators/blob/master/README
 ## Decorators
 - `with_logging`: Performs basic logging.
 - `load_json_body`: Loads the JSON body of a request.
-- `catch_errors`: Handles all exceptions.
+- `catch_errors`: Performs catch-all exception handling.
 - `with_ssm_parameters`: Fetches secrets from the SSM parameter store.
 - `cors_headers`: Automatically injects CORS headers into HTTP responses.
 
@@ -53,10 +53,10 @@ catch_errors:
     >>>
     >>> @catch_errors
     ... def my_handler(event, context):
-    ...     raise ValueError("This is a test")
+    ...     raise ValueError("boo")
     >>>
     >>> my_handler({}, {})
-    {'statusCode': 400, 'body': '{"Message": "Invalid request: This is a test"}'}
+    ERROR    root:decorators.py:119 {"errorType": "ValueError", "errorMessage": "boo", "stackTrace":...}
 
 
 with_ssm_parameters:

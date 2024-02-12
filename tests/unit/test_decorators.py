@@ -88,33 +88,62 @@ def test_load_json_body_error():
 
 
 # test catch_errors with ValueError
-def test_catch_errors_value():
+def test_catch_errors_value(caplog):
     @catch_errors
     def handler(event, context):
         raise ValueError("boo")
 
-    assert handler({"boo"}, "ya") == {
-        "statusCode": 400,
-        "body": json.dumps({"message": "Invalid request: boo"}),
-    }
+    with pytest.raises(ValueError, match=r"boo"):
+        handler({"body": "Hello World"}, {})
+
+    assert (
+        '''"errorType": "ValueError", "errorMessage": "boo"'''
+        in caplog.records[0].message
+    )
+    assert caplog.records[0].levelno == logging.ERROR
+    assert caplog.records[0].module == "decorators"
 
 
 # test catch_errors with Boto ClientError
-def test_catch_errors_client():
+def test_catch_errors_client(caplog):
     @catch_errors
     def handler(event, context):
-        raise ClientError("foo", "bar")
+        # This function simulates a boto3 operation that raises ClientError
+        raise ClientError(
+            {"Error": {"Code": "MyErrorCode", "Message": "My error message"}},
+            "operation_name",
+        )
 
-    assert handler({"boo"}, "ya")["statusCode"] == 400
+    with pytest.raises(
+        ClientError,
+        match=r"An error occurred \(MyErrorCode\) when calling the operation_name operation: My error message",
+    ):
+        handler({"body": "Hello World"}, {})
+
+    assert (
+        '''"errorType": "ClientError", "errorMessage": "An error occurred (MyErrorCode) when calling the \
+operation_name operation: My error message"'''
+        in caplog.records[0].message
+    )
+    assert caplog.records[0].levelno == logging.ERROR
+    assert caplog.records[0].module == "decorators"
 
 
 # test catch_errors with JSONDecoder exception
-def test_catch_errors_jsondecoder():
+def test_catch_errors_jsondecoder(caplog):
     @catch_errors
     def handler(event, context):
         json.loads(event)
 
-    assert handler("boo", "ya")["statusCode"] == 400
+    with pytest.raises(JSONDecodeError, match=r"Expecting value:"):
+        handler("Hello World", {})
+
+    assert (
+        """"errorType": "JSONDecodeError", "errorMessage": "Expecting value:"""
+        in caplog.records[0].message
+    )
+    assert caplog.records[0].levelno == logging.ERROR
+    assert caplog.records[0].module == "decorators"
 
 
 # test with_ssm_parameters with single parameter
